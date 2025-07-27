@@ -1,29 +1,27 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { SupplierLayout } from "@/components/layouts/supplier-layout"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import {
   Dialog,
+  DialogTrigger,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog"
-import { Package, Plus, Edit, Trash2, Check, X, Clock, Truck } from "lucide-react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import SupplierLayout from "@/components/SupplierLayout"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
+import { Badge } from "@/components/ui/badge"
+import { Clock, Check, Truck, X, Plus, Package, Edit, Trash2 } from "lucide-react"
 
-interface Product {
+type Product = {
   id: string
   name: string
   category: string
@@ -31,24 +29,25 @@ interface Product {
   unit: string
   stock_quantity: number
   description: string
+  supplier_id: string
 }
 
-interface Order {
+type Order = {
   id: string
-  total_amount: number
-  status: string
   created_at: string
+  status: string
   vendor_name: string
   vendor_phone: string
   vendor_address: string
-  items: Array<{
+  items: {
     product_name: string
     quantity: number
     price: number
-  }>
+  }[]
+  total_amount: number
 }
 
-export default function SupplierDashboard() {
+const DashboardPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([])
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
@@ -151,6 +150,7 @@ export default function SupplierDashboard() {
           quantity: item.quantity,
           price: item.price,
         })),
+        total_amount: order.order_items.reduce((total, item) => total + item.price * item.quantity, 0),
       }))
 
       setOrders(formattedOrders)
@@ -335,7 +335,9 @@ export default function SupplierDashboard() {
                       </DialogHeader>
                       <form onSubmit={handleProductSubmit} className="space-y-4">
                         <div className="space-y-2">
-                          <Label htmlFor="name">Product Name</Label>
+                          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                            Product Name
+                          </label>
                           <Input
                             id="name"
                             value={productForm.name}
@@ -345,7 +347,9 @@ export default function SupplierDashboard() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="category">Category</Label>
+                          <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+                            Category
+                          </label>
                           <Select
                             value={productForm.category}
                             onValueChange={(value) => setProductForm({ ...productForm, category: value })}
@@ -365,7 +369,9 @@ export default function SupplierDashboard() {
 
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <Label htmlFor="price">Price (₹)</Label>
+                            <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+                              Price (₹)
+                            </label>
                             <Input
                               id="price"
                               type="number"
@@ -376,7 +382,9 @@ export default function SupplierDashboard() {
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="unit">Unit</Label>
+                            <label htmlFor="unit" className="block text-sm font-medium text-gray-700">
+                              Unit
+                            </label>
                             <Select
                               value={productForm.unit}
                               onValueChange={(value) => setProductForm({ ...productForm, unit: value })}
@@ -396,7 +404,9 @@ export default function SupplierDashboard() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="stock">Stock Quantity</Label>
+                          <label htmlFor="stock" className="block text-sm font-medium text-gray-700">
+                            Stock Quantity
+                          </label>
                           <Input
                             id="stock"
                             type="number"
@@ -407,7 +417,9 @@ export default function SupplierDashboard() {
                         </div>
 
                         <div className="space-y-2">
-                          <Label htmlFor="description">Description</Label>
+                          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                            Description
+                          </label>
                           <Input
                             id="description"
                             value={productForm.description}
@@ -610,3 +622,5 @@ export default function SupplierDashboard() {
     </SupplierLayout>
   )
 }
+
+export default DashboardPage

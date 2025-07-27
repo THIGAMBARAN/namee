@@ -61,42 +61,6 @@ export default function VendorDashboard() {
   const categories = ["Vegetables", "Spices", "Oil", "Grains", "Dairy", "Meat", "Other"]
   const cities = ["Mumbai", "Delhi", "Bangalore", "Chennai", "Kolkata", "Pune", "Hyderabad"]
 
-  // Show configuration error if environment variables are missing
-  if (!hasSupabaseConfig()) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <AlertTriangle className="h-8 w-8 text-red-600" />
-              <h1 className="text-2xl font-bold text-red-600">Configuration Required</h1>
-            </div>
-            <CardTitle>Supabase Setup Needed</CardTitle>
-            <CardDescription>Please configure your Supabase environment variables to continue.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                <strong>Missing Environment Variables</strong>
-                <br />
-                <br />
-                Create a <code className="bg-gray-100 px-1 rounded">.env.local</code> file in your project root with
-                your Supabase credentials.
-              </AlertDescription>
-            </Alert>
-
-            <div className="text-center pt-4">
-              <Link href="/" className="text-orange-600 hover:underline">
-                ← Back to Home
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
   useEffect(() => {
     checkUser()
     fetchProducts()
@@ -106,6 +70,9 @@ export default function VendorDashboard() {
   useEffect(() => {
     filterProducts()
   }, [products, searchTerm, selectedCategory, selectedCity])
+
+  // Show configuration error if environment variables are missing
+  const configError = !hasSupabaseConfig()
 
   const checkUser = async () => {
     if (!supabase) return
@@ -342,12 +309,45 @@ export default function VendorDashboard() {
     }
   }
 
-  if (loading) {
+  if (loading || configError) {
     return (
       <VendorLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-600"></div>
-        </div>
+        {configError ? (
+          <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center p-4">
+            <Card className="w-full max-w-md">
+              <CardHeader className="text-center">
+                <div className="flex items-center justify-center space-x-2 mb-4">
+                  <AlertTriangle className="h-8 w-8 text-red-600" />
+                  <h1 className="text-2xl font-bold text-red-600">Configuration Required</h1>
+                </div>
+                <CardTitle>Supabase Setup Needed</CardTitle>
+                <CardDescription>Please configure your Supabase environment variables to continue.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Alert variant="destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Missing Environment Variables</strong>
+                    <br />
+                    <br />
+                    Create a <code className="bg-gray-100 px-1 rounded">.env.local</code> file in your project root with
+                    your Supabase credentials.
+                  </AlertDescription>
+                </Alert>
+
+                <div className="text-center pt-4">
+                  <Link href="/" className="text-orange-600 hover:underline">
+                    ← Back to Home
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-600"></div>
+          </div>
+        )}
       </VendorLayout>
     )
   }
