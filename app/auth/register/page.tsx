@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
@@ -11,10 +10,89 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ShoppingCart, Eye, EyeOff, AlertTriangle } from "lucide-react"
+import { ShoppingCart, Eye, EyeOff, AlertTriangle, ExternalLink } from "lucide-react"
 import { createSupabaseClient, hasSupabaseConfig } from "@/lib/supabase-client"
 
+function ConfigurationError() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center p-4">
+      <Card className="w-full max-w-lg">
+        <CardHeader className="text-center">
+          <div className="flex items-center justify-center space-x-2 mb-4">
+            <AlertTriangle className="h-8 w-8 text-red-600" />
+            <h1 className="text-2xl font-bold text-red-600">Setup Required</h1>
+          </div>
+          <CardTitle>Supabase API Keys Needed</CardTitle>
+          <CardDescription>Configure your Supabase credentials to continue</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Missing Environment Variables</strong>
+              <br />
+              <br />
+              You need to set up your Supabase API keys to use this application.
+            </AlertDescription>
+          </Alert>
+
+          <div className="space-y-4">
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <h3 className="font-semibold text-blue-900 mb-2">Quick Setup (5 minutes)</h3>
+              <ol className="list-decimal list-inside space-y-2 text-sm text-blue-800">
+                <li>
+                  Go to{" "}
+                  <a
+                    href="https://supabase.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline hover:text-blue-600"
+                  >
+                    supabase.com
+                  </a>{" "}
+                  and create a project
+                </li>
+                <li>Go to Settings → API in your dashboard</li>
+                <li>Copy your Project URL and anon/public key</li>
+                <li>Create a .env.local file in your project root</li>
+                <li>Add your credentials and restart the server</li>
+              </ol>
+            </div>
+
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <h4 className="font-medium mb-2">Your .env.local file should contain:</h4>
+              <code className="text-xs block bg-white p-3 rounded border">
+                NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+                <br />
+                NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIs...
+              </code>
+            </div>
+          </div>
+
+          <div className="flex flex-col space-y-3">
+            <Button asChild className="bg-blue-600 hover:bg-blue-700">
+              <a href="https://supabase.com" target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Create Supabase Project
+              </a>
+            </Button>
+
+            <Button asChild variant="outline">
+              <Link href="/setup">View Detailed Setup Guide</Link>
+            </Button>
+
+            <Button asChild variant="ghost">
+              <Link href="/">← Back to Home</Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
 export default function RegisterPage() {
+  const [mounted, setMounted] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -32,76 +110,30 @@ export default function RegisterPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  // Only create Supabase client if config is available
-  const supabase = hasSupabaseConfig() ? createSupabaseClient() : null
-
+  // Handle client-side mounting
   useEffect(() => {
-    const typeParam = searchParams.get("type")
-    if (typeParam === "vendor" || typeParam === "supplier") {
-      setRole(typeParam)
-    }
-  }, [searchParams])
+    setMounted(true)
+  }, [])
 
-  // Show configuration error if environment variables are missing
-  if (!hasSupabaseConfig()) {
+  // Handle search params after mounting
+  useEffect(() => {
+    if (mounted) {
+      const typeParam = searchParams.get("type")
+      if (typeParam === "vendor" || typeParam === "supplier") {
+        setRole(typeParam)
+      }
+    }
+  }, [searchParams, mounted])
+
+  // Show loading state during hydration
+  if (!mounted) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="flex items-center justify-center space-x-2 mb-4">
-              <AlertTriangle className="h-8 w-8 text-red-600" />
-              <h1 className="text-2xl font-bold text-red-600">Configuration Required</h1>
-            </div>
-            <CardTitle>Supabase Setup Needed</CardTitle>
-            <CardDescription>Please configure your Supabase environment variables to continue.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Alert variant="destructive">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                <strong>Missing Environment Variables</strong>
-                <br />
-                <br />
-                Create a <code className="bg-gray-100 px-1 rounded">.env.local</code> file in your project root with:
-              </AlertDescription>
-            </Alert>
-
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <code className="text-sm block">
-                NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-                <br />
-                NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-              </code>
-            </div>
-
-            <div className="space-y-2 text-sm text-gray-600">
-              <p>
-                <strong>How to get these values:</strong>
-              </p>
-              <ol className="list-decimal list-inside space-y-1">
-                <li>
-                  Go to{" "}
-                  <a
-                    href="https://supabase.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-orange-600 hover:underline"
-                  >
-                    supabase.com
-                  </a>
-                </li>
-                <li>Create a new project or select existing one</li>
-                <li>Go to Settings → API</li>
-                <li>Copy your Project URL and anon/public key</li>
-                <li>Add them to your .env.local file</li>
-                <li>Restart your development server</li>
-              </ol>
-            </div>
-
-            <div className="text-center pt-4">
-              <Link href="/" className="text-orange-600 hover:underline">
-                ← Back to Home
-              </Link>
+          <CardContent className="flex items-center justify-center p-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading...</p>
             </div>
           </CardContent>
         </Card>
@@ -109,16 +141,17 @@ export default function RegisterPage() {
     )
   }
 
+  // Check Supabase configuration after mounting
+  if (!hasSupabaseConfig()) {
+    return <ConfigurationError />
+  }
+
+  const supabase = createSupabaseClient()
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError("")
-
-    if (!supabase) {
-      setError("Supabase is not configured properly")
-      setLoading(false)
-      return
-    }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match")
@@ -332,7 +365,7 @@ export default function RegisterPage() {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Already have an account?{" "}
-              <Link href="/auth/register" className="text-orange-600 hover:underline">
+              <Link href="/auth/login" className="text-orange-600 hover:underline">
                 Sign in
               </Link>
             </p>
