@@ -1,9 +1,14 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ShoppingCart, Store, Users, MapPin, Star, TrendingUp } from "lucide-react"
 
 export default function HomePage() {
+  // Access environment variables directly in a Server Component
+  // These values are determined at build time or server-side runtime.
+  const mySecretApiKey = process.env.MY_SECRET_API_KEY
+  const nextPublicAnalyticsKey = process.env.NEXT_PUBLIC_ANALYTICS_KEY
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-50">
       {/* Header */}
@@ -63,10 +68,10 @@ export default function HomePage() {
                 <CardTitle>Location-Based Matching</CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription>
+                <p className="text-gray-600 dark:text-gray-400">
                   Find suppliers near your location to reduce delivery time and costs. Our smart matching system
                   connects you with the closest verified suppliers.
-                </CardDescription>
+                </p>
               </CardContent>
             </Card>
 
@@ -76,10 +81,10 @@ export default function HomePage() {
                 <CardTitle>Price Comparison</CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription>
+                <p className="text-gray-600 dark:text-gray-400">
                   Compare prices from multiple suppliers in real-time. Make informed decisions and get the best deals
                   for your raw materials.
-                </CardDescription>
+                </p>
               </CardContent>
             </Card>
 
@@ -89,10 +94,10 @@ export default function HomePage() {
                 <CardTitle>Verified Suppliers</CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription>
+                <p className="text-gray-600 dark:text-gray-400">
                   All suppliers are verified and rated by the community. Build trust and ensure quality with our rating
                   and review system.
-                </CardDescription>
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -134,6 +139,26 @@ export default function HomePage() {
           <p className="text-gray-500 text-sm">© 2024 SupplyConnect. All rights reserved.</p>
         </div>
       </footer>
+
+      {/* Environment Variable Debugging Section */}
+      <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-800 rounded-md text-left text-sm mx-auto max-w-md">
+        <h3 className="font-semibold mb-2">Environment Variable Check:</h3>
+        <p>
+          <span className="font-mono">MY_SECRET_API_KEY</span>:{" "}
+          <span className="font-bold text-green-600 dark:text-green-400">
+            {mySecretApiKey ? "Loaded (value present)" : "Not Loaded (value missing)"}
+          </span>
+        </p>
+        <p>
+          <span className="font-mono">NEXT_PUBLIC_ANALYTICS_KEY</span>:{" "}
+          <span className="font-bold text-green-600 dark:text-green-400">
+            {nextPublicAnalyticsKey ? "Loaded (value present)" : "Not Loaded (value missing)"}
+          </span>
+        </p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+          If a key shows "Not Loaded", please check your .env.local file or Vercel project settings.
+        </p>
+      </div>
     </div>
   )
 }
